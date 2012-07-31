@@ -1,0 +1,52 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <description>This example imports a CSV with currency exchange rates into a database. Custom formatting rules are used for parsing text values. After that data is exported into a CSV with different formatting rules.</description>
+    <!-- Connection to in-memory database -->
+    <connection id="db" driver="auto" url="jdbc:hsqldb:mem:tst" user="sa" password="" classpath="../lib/hsqldb.jar"/>
+
+    <!-- Connection to CSV input file -->
+    <connection id="csv_in" driver="csv" url="eurusd_in.csv">
+       #Define formatting of columns in the input CSV file
+       format.CurrencyPair.trim=true
+       format.RateDateTime.type=date
+       format.RateDateTime.pattern=yyyy-MM-dd HH:mm:ss.SSS
+    </connection>
+
+    <!-- Connection to CSV output file -->
+    <connection id="csv_out" driver="csv" url="eurusd_out.csv">  
+       quote=
+       #Define formatting of columns in the input CSV file
+       format.Time.type=date
+       format.Time.pattern=dd.MM.yyyy HH:mm:ss
+       format.Bid.type=number
+       format.Bid.pattern=##.0000
+       format.Ask.type=number
+       format.Ask.pattern=##.0000
+    </connection>
+
+    <connection id="log" driver="text"/> <!-- For printing debug information on the console -->
+
+    <!-- Create a database schema -->
+    <script connection-id="db">
+        CREATE TABLE Rates (Time DATE PRIMARY KEY, CurrencyPair VARCHAR(10), Bid Decimal, Ask Decimal );
+    </script>
+
+    <!-- Reads all rows in the csv input and insert into the database -->
+    <query connection-id="csv_in">
+        <script connection-id="db"> 
+             INSERT INTO Rates(TIME, CurrencyPair, Bid, Ask) VALUES (?RateDateTime, ?CurrencyPair, ?RateBid, ?RateAsk);
+        </script>
+        <script connection-id="log">
+             Inserted a row: $RateDateTime, $CurrencyPair, $RateBid, $RateAsk
+        </script>
+    </query>
+
+    <!-- Dump table data into output CSV file -->
+    <query connection-id="db">
+        SELECT * FROM Rates ORDER BY Time
+        <script connection-id="csv_out">
+            $Time,$CurrencyPair,$Bid, $Ask 
+        </script>
+    </query>
+
+</etl>
