@@ -8,14 +8,13 @@
     <connection id="csv_in" driver="csv" url="eurusd_in.csv">
        #Define formatting of columns in the input CSV file
        format.CurrencyPair.trim=true
-       format.RateDateTime.type=date
-       format.RateDateTime.pattern=yyyy-MM-dd HH:mm:ss.SSS
+       format.RateDateTime.type=timestamp
     </connection>
 
     <!-- Connection to CSV output file -->
     <connection id="csv_out" driver="csv" url="eurusd_out.csv">  
        quote=
-       #Define formatting of columns in the input CSV file
+       #Define formatting of columns in the output CSV file
        format.Time.type=date
        format.Time.pattern=dd.MM.yyyy HH:mm:ss
        format.Bid.type=number
@@ -28,7 +27,7 @@
 
     <!-- Create a database schema -->
     <script connection-id="db">
-        CREATE TABLE Rates (Time DATE PRIMARY KEY, CurrencyPair VARCHAR(10), Bid Decimal, Ask Decimal );
+        CREATE TABLE Rates (Time TIMESTAMP PRIMARY KEY, CurrencyPair VARCHAR(10), Bid Decimal, Ask Decimal );
     </script>
 
     <!-- Reads all rows in the csv input and insert into the database -->
