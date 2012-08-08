@@ -1,0 +1,30 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <connection id="in" driver="xpath" url="http://snippets.dzone.com/rss"/>
+    <connection id="out" driver="text" url="rss.txt"/>
+    <connection id="db" driver="hsqldb" url="jdbc:hsqldb:db/rss" user="sa" classpath="hsqldb.jar"/>
+    <script connection-id="db">
+       CREATE TABLE Rss (
+           ID Integer,
+           Title VARCHAR(255),
+           Description VARCHAR(255),   
+           Link VARCHAR(255)
+
+       )
+    </script>
+    <query connection-id="in">
+        /rss/channel/item
+        <script connection-id="out">
+            Title: $title
+            Description: [
+            ${description.substring(0, 20)}...
+            ]
+            Link: $link
+            ----------------------------------
+        </script>
+        <script connection-id="db">
+            INSERT INTO Rss (ID, Title, Description, Link) 
+            VALUES (?rownum, ?title, ?description, ?link);
+        </script>
+    </query>
+</etl>
