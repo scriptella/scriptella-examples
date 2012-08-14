@@ -8,6 +8,10 @@
     <connection id="csv_in" driver="csv" url="eurusd_in.csv">
        #Define formatting of columns in the input CSV file
        format.CurrencyPair.trim=true
+       format.RateBid.type=number
+       format.RateBid.pattern=#.#
+       format.RateAsk.type=number
+       format.RateAsk.pattern=#.#
        format.RateDateTime.type=timestamp
     </connection>
 
