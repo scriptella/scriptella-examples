@@ -10,7 +10,7 @@ import scriptella.driver.spring.EtlExecutorBean;
 import scriptella.execution.EtlExecutorException;
 
 /**
- * Just a smoke test which
+ * Just a smoke test which calls populateDb executor registered as a Spring bean.
  */
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration(locations = {"/spring-beans.xml"})
