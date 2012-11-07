@@ -1,0 +1,41 @@
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+    <bean id="datasource" class="org.h2.jdbcx.JdbcConnectionPool" destroy-method="dispose">
+        <constructor-arg>
+            <bean class="org.h2.jdbcx.JdbcDataSource">
+                <property name="URL" value="jdbc:h2:mem:dbname"/>
+                <property name="user" value="sa"/>
+                <property name="password" value=""/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="progress" class="scriptella.interactive.ConsoleProgressIndicator"/>
+
+    <bean id="createDb" class="scriptella.driver.spring.EtlExecutorBean">
+        <property name="configLocation"><value>create-db.etl.xml</value></property>
+        <property name="progressIndicator"><ref local="progress"/></property>
+        <property name="autostart" value="true"/> <!-- Etl will be run during app context initialization -->
+    </bean>
+    <bean id="populateDb" class="scriptella.driver.spring.EtlExecutorBean">
+        <property name="configLocation"><value>populate-db.etl.xml</value></property>
+        <property name="progressIndicator"><ref local="progress"/></property>
+        <!-- Properties can be passed to the ETL job.
+             In this example 3 properties are defined:
+             - generated_rows_count - number of rows to generate by this job
+             - CurrencyPair - name of the currency pair for generated rows
+             - RateBid - initial value of Bid price
+             - RateAsk - initial value of ASK price
+             -->
+        <property name="properties"><map>
+            <entry key="generated_rows_count"><value>10</value></entry>
+            <entry key="CurrencyPair"><value>EURUSD</value></entry>
+            <entry key="RateBid"><value>1.3</value></entry>
+            <entry key="RateAsk" value="1.31"/>
+        </map>
+        </property>
+    </bean>
+
+</beans>

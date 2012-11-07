@@ -1,0 +1,42 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <connection id="spring" driver="spring" url="datasource"/>
+    <connection id="log" driver="text">
+        #Define formatting of variables in the output
+        format.Bid.type=number
+        format.Bid.pattern=##.0000
+        format.Ask.type=number
+        format.Ask.pattern=##.0000
+    </connection>
+    <connection id="jexl" driver="jexl"/>
+
+
+    <query connection-id="jexl">
+        i=0;
+        now = etl.date.now();
+        rnd = new("java.util.Random");
+
+        while (i lt generated_rows_count) {
+          RateDateTime = new("java.util.Date", now.getTime()+i*1000);
+          step = (rnd.nextInt(10)-5)/10000.0;
+          RateBid=RateBid+step;
+          RateAsk=RateAsk+step;
+          query.next();
+          i=i+1;
+        }
+        <script connection-id="spring">
+            INSERT INTO Rates(TIME, CurrencyPair, Bid, Ask) VALUES (?RateDateTime, ?CurrencyPair, ?RateBid, ?RateAsk);
+        </script>
+    </query>
+
+    <!-- Dump table data to screen -->
+    <script connection-id="log">
+        Generated $generated_rows_count rows:
+    </script>
+    <query connection-id="spring">
+        SELECT * FROM Rates ORDER BY Time
+        <script connection-id="log">
+            $Time,$CurrencyPair,$Bid, $Ask
+        </script>
+    </query>
+</etl>
