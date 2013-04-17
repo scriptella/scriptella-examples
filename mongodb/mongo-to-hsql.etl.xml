@@ -1,0 +1,63 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <connection id="in" url="mongodb://localhost/test" classpath="../lib/scriptella-mongodb-driver.jar:../lib/mongo-java-driver-2.10.1.jar" />
+    <connection id="out" url="jdbc:hsqldb:db/blogs" user="sa" password="" classpath="../lib/hsqldb.jar"/>
+    <connection id="jexl" driver="jexl"/>
+    <connection id="log" driver="text"/>
+
+    <!-- Clean up USERS/POSTS/COMMENTS tables-->
+    <script connection-id="out">
+        DELETE FROM COMMENTS;
+        DELETE FROM POSTS;
+        DELETE FROM USERS;
+    </script>
+
+    <!-- Migrate users -->
+    <query connection-id="in">
+        {
+            operation: 'db.collection.find',
+            collection: 'users',
+            data: {}
+        }
+        <script connection-id="log">
+            Migrating User: user_id=$user_id
+        </script>
+        <script connection-id="out">
+            INSERT INTO USERS ( USER_ID , NAME) VALUES (?user_id, ?name);
+        </script>
+    </query>
+
+    <!-- Migrate posts and comments -->
+    <query connection-id="in">
+        {
+        operation: 'db.collection.find',
+        collection: 'posts',
+        data: {}
+        }
+        <script connection-id="log">
+            Migrating Post: _id=$_id comments=$comments
+        </script>
+        <script connection-id="out">
+            INSERT INTO POSTS ( USER_ID , POST_ID, CREATED, TEXT) VALUES (?user_id, ?{'p'+rownum}, ?created, ?text);
+        </script>
+
+        <!-- Comments is a more difficult case since they are stored in array field.
+        We iterate over the array using jexl and for each comment produce a virtual query result consumed by inner script -->
+        <query connection-id="jexl">
+            //Remember the post_id because rownum is overridden due to querying
+            post_id = 'p'+rownum;
+            for (comment : comments) {
+                query.next();
+            }
+            <script connection-id="log">
+                Migrating comment $text for post $post_id
+            </script>
+            <script connection-id="out">
+                INSERT INTO COMMENTS ( COMMENT_ID, POST_ID, CREATED, TEXT) VALUES (?{'c'+rownum+post_id}, ?post_id, ?created, ?text);
+            </script>
+        </query>
+
+    </query>
+
+
+</etl>

@@ -1,0 +1,9 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <connection url="jdbc:hsqldb:db/blogs" user="sa" password="" classpath="../lib/hsqldb.jar"/>
+    <script>
+        <include href="schema.sql"/>
+        <include href="data.sql"/>
+    </script>
+
+</etl>

@@ -1,0 +1,96 @@
+<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<etl>
+    <connection id="in" url="jdbc:hsqldb:db/blogs" user="sa" password="" classpath="../lib/hsqldb.jar"/>
+    <connection id="out" url="mongodb://localhost/test" classpath="../lib/scriptella-mongodb-driver.jar:../lib/mongo-java-driver-2.10.1.jar" />
+    <connection id="log" driver="text"/>
+
+    <!-- Drop users/posts collection -->
+    <script connection-id="out">
+    [
+        {
+            operation: 'db.runCommand',
+            data: { drop: 'users' }
+        },
+        {
+            operation: 'db.runCommand',
+            data: { drop: 'posts' }
+        }
+    ]
+    </script>
+
+    <query connection-id="in">
+        SELECT * FROM USERS
+        <script connection-id="log">
+            User: id=$user_id
+        </script>
+        <script connection-id="out">
+            {
+                operation: 'db.collection.save',
+                collection: 'users',
+                data: {
+                    user_id: '?user_id',
+                    name: '?name'
+                }
+            }
+        </script>
+    </query>
+
+    <query connection-id="in">
+        SELECT * FROM POSTS
+        <script connection-id="log">
+            Post: id=$post_id, user_id=$user_id
+        </script>
+        <script connection-id="out">
+            {
+                operation: 'db.collection.save',
+                collection: 'posts',
+                data: {
+                    user_id: '?user_id',
+                    post_id: '?post_id',
+                    text: '?text',
+                    created: '?created',
+                    comments: []
+                }
+            }
+        </script>
+    </query>
+
+    <!-- Perform migration of comments:
+         For each comment in the COMMENTS table
+         Lookup a corresponding document in the "posts" collection and push text to its comments field.
+    -->
+    <query connection-id="in">
+        SELECT * FROM COMMENTS
+        <script connection-id="log">
+            Comment: post_id=$post_id text=$text
+        </script>
+        <script connection-id="out">
+            {
+                operation: 'db.collection.update',
+                collection: 'posts',
+                data: [
+                    <!-- Query.  Use value of post_id column from COMMENTS table -->
+                    {post_id: '?post_id'},
+                    <!-- Update. Use value of text column from COMMENTS table -->
+                    {$push: {comments: '?text'}}
+                ]
+            }
+        </script>
+    </query>
+
+    <!-- Cleanup. Remove post_id from posts, since it was only used to identify posts when adding comments -->
+    <script connection-id="out">
+        {
+        operation: 'db.collection.update',
+        collection: 'posts',
+        data: [
+        <!-- Query -->
+        {},
+        <!-- Update -->
+        {$unset: {post_id: 1}}
+        ]
+        }
+    </script>
+
+
+</etl>
