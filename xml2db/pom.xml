@@ -1,8 +1,8 @@
-<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<!DOCTYPE etl SYSTEM "https://scriptella.org/dtd/etl.dtd">
 <etl>
     <connection id="in" driver="xpath" url="http://snippets.dzone.com/rss"/>
     <connection id="out" driver="text" url="rss.txt"/>
-    <connection id="db" driver="hsqldb" url="jdbc:hsqldb:db/rss" user="sa" classpath="hsqldb.jar"/>
+    <connection id="db" driver="h2" url="jdbc:h2:db/rss;MODE=LEGACY" user="sa" classpath="h2.jar"/>
     <script connection-id="db">
        CREATE TABLE Rss (
            ID Integer,
