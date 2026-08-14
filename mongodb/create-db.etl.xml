@@ -1,6 +1,6 @@
-<!DOCTYPE etl SYSTEM "http://scriptella.javaforge.com/dtd/etl.dtd">
+<!DOCTYPE etl SYSTEM "https://scriptella.org/dtd/etl.dtd">
 <etl>
-    <connection url="jdbc:hsqldb:db/blogs" user="sa" password="" classpath="../lib/hsqldb.jar"/>
+    <connection url="jdbc:h2:db/blogs;MODE=LEGACY" user="sa" password="" classpath="../lib/h2.jar"/>
     <script>
         <include href="schema.sql"/>
         <include href="data.sql"/>

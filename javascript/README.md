@@ -1,7 +1,7 @@
 Transformations in JavaScript
 ---------------------------
 
-[Scriptella](http://scriptella.javaforge.com) provides a simple way to perform various transformations in JavaScript (or other scripting language which have a corresponding driver). Our example transformation consists of 3 steps:
+[Scriptella](https://scriptella.org) provides a simple way to perform various transformations in JavaScript (or another scripting language with a corresponding engine). Our example transformation consists of 3 steps:
 
 1. Select rows from source table. 
 2. Transform a column value from number to text 

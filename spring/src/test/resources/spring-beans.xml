@@ -1,7 +1,7 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
-           http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+           https://www.springframework.org/schema/beans/spring-beans.xsd">
     <bean id="datasource" class="org.h2.jdbcx.JdbcConnectionPool" destroy-method="dispose">
         <constructor-arg>
             <bean class="org.h2.jdbcx.JdbcDataSource">
@@ -16,12 +16,12 @@
 
     <bean id="createDb" class="scriptella.driver.spring.EtlExecutorBean">
         <property name="configLocation"><value>create-db.etl.xml</value></property>
-        <property name="progressIndicator"><ref local="progress"/></property>
+        <property name="progressIndicator"><ref bean="progress"/></property>
         <property name="autostart" value="true"/> <!-- Etl will be run during app context initialization -->
     </bean>
     <bean id="populateDb" class="scriptella.driver.spring.EtlExecutorBean">
         <property name="configLocation"><value>populate-db.etl.xml</value></property>
-        <property name="progressIndicator"><ref local="progress"/></property>
+        <property name="progressIndicator"><ref bean="progress"/></property>
         <!-- Properties can be passed to the ETL job.
              In this example 3 properties are defined:
              - generated_rows_count - number of rows to generate by this job
