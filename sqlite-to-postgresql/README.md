@@ -1,8 +1,8 @@
 # SQLite → PostgreSQL
 
 This is the canonical Scriptella 1.6 file-backed SQLite migration example.
-Use Java 17+, Python 3, psql, a Scriptella 1.6 distribution, and an empty,
-disposable PostgreSQL database. The target table `sqlite_records` must not exist.
+Use Java 17+, psql, a Scriptella 1.6 distribution, and an empty, disposable
+PostgreSQL database. The target table `sqlite_records` must not exist.
 The example creates it and commits four rows; repeat runs fail instead of
 silently replacing data. It does not promise cross-database atomicity.
 
@@ -30,10 +30,14 @@ export PGHOST=localhost PGPORT=5432 PGDATABASE=sqlite_example
 
 Use disposable credentials here; JVM arguments may be visible in process
 listings. For production, obtain credentials through your protected
-configuration mechanism. Run from this sample directory:
+configuration mechanism. Run from this sample directory. Point `SQLITE_DB`
+at a path that does not exist yet. Scriptella creates that file, the
+`records` table, and the four source rows. Seeding again fails because the
+table is already there.
 
 ```sh
-python3 seed.py "$SQLITE_DB"
+java -Ddb.path="$SQLITE_DB" -Dsqlite.jar="$SQLITE_JAR" \
+     -jar "$SCRIPTELLA_JAR" --quiet --no-jmx seed.etl.xml
 java -Ddb.path="$SQLITE_DB" -Dsqlite.jar="$SQLITE_JAR" -Dpg.jar="$PG_JAR" \
      -Dpg.url="$PG_URL" -Dpg.user="$PGUSER" -Dpg.password="$PGPASSWORD" \
      -jar "$SCRIPTELLA_JAR" --quiet --no-jmx migrate.etl.xml
